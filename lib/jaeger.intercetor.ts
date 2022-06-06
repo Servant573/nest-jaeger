@@ -3,37 +3,37 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { Observable } from "rxjs";
-import { tap } from "rxjs/operators";
-import { initTracer } from "jaeger-client";
-import { FORMAT_HTTP_HEADERS, Tags } from "opentracing";
-import axios from "axios";
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { initTracer } from 'jaeger-client';
+import { FORMAT_HTTP_HEADERS, Tags } from 'opentracing';
+import axios from 'axios';
 
 const TAGS = {
   ...Tags,
-  PROTOCAL: "protocal",
-  TRACING_TAG: "tracing-tag",
+  PROTOCAL: 'protocal',
+  TRACING_TAG: 'tracing-tag',
 };
 
-const UNKNOW = "Unknow";
+const UNKNOW = 'Unknow';
 
 const DEFAULT_SAMPLER = {
-  type: "const",
+  type: 'const',
   param: 1,
 };
 
 const DEFAULT_REPORTER = {
-  collectorEndpoint: "http://localhost:14268/api/traces",
+  collectorEndpoint: 'http://localhost:14268/api/traces',
 };
 
 const DEFAULT_LOGGER = {
   info: (msg) => {
-    console.log("JAEGER INFO ", msg);
+    console.log('JAEGER INFO ', msg);
   },
   error: (msg) => {
-    console.log("JAEGER ERROR", msg);
+    console.log('JAEGER ERROR', msg);
   },
 };
 
@@ -48,14 +48,14 @@ const DEFAULT_CONFIG = {
 @Injectable()
 export class JaegerInterceptor implements NestInterceptor {
   // tracer instance, one request one tracer
-  private tracer: any = undefined;
+  private readonly tracer: any = undefined;
   // master span instance, can have mutilpe chirld span inside
   private span: any = undefined;
   // tracing tag from request and will pass to remote call
   private tracing_tag: any = {};
   // callback function form user
-  private req_cb: any = undefined;
-  private res_cb: any = undefined;
+  private readonly req_cb: any = undefined;
+  private readonly res_cb: any = undefined;
 
   constructor(cfg?: {}, opt?: {}, req_cb?: any, res_cb?: any) {
     // init tracer
@@ -66,9 +66,9 @@ export class JaegerInterceptor implements NestInterceptor {
         this.tracer = initTracer(config, options);
         this.req_cb = req_cb;
         this.res_cb = res_cb;
-        console.log("[*]Init tracer ... [ DONE ] ");
+        console.log('[*]Init tracer ... [ DONE ] ');
       } catch (error) {
-        console.error("[*]Init tracer ... [ FAILED ] ");
+        console.error('[*]Init tracer ... [ FAILED ] ');
       }
     } else {
       console.log(`[*]Tracer already existed`);
@@ -79,8 +79,8 @@ export class JaegerInterceptor implements NestInterceptor {
     // handle metadata
     const reflector = new Reflector();
     const except = reflector.get<boolean>(
-      "ExceptJaegerInterceptor",
-      context.getHandler()
+      'ExceptJaegerInterceptor',
+      context.getHandler(),
     );
     if (except) return next.handle();
     ////////////////////////////////////////////////////////////////////
@@ -117,8 +117,8 @@ export class JaegerInterceptor implements NestInterceptor {
         axios: (opts: any = undefined) => {
           if (!opts) return;
           // inject tracing tag to remote call
-          var options = {};
-          var headers = {};
+          let options = {};
+          const headers = {};
           headers[TAGS.TRACING_TAG] = JSON.stringify(this.tracing_tag);
           this.tracer.inject(this.span, FORMAT_HTTP_HEADERS, headers);
           opts.headers = { ...opts.headers, ...headers };
@@ -166,12 +166,12 @@ export class JaegerInterceptor implements NestInterceptor {
     req.jaeger = createJaegerInstance();
 
     // mark default tag of request
-    req.jaeger.setTag("request.ip", req.ip || UNKNOW);
-    req.jaeger.setTag("request.method", req.method || UNKNOW);
-    req.jaeger.setTag("request.headers", req.headers || UNKNOW);
-    req.jaeger.setTag("request.path", req.path || UNKNOW);
-    req.jaeger.setTag("request.body", req.body || UNKNOW);
-    req.jaeger.setTag("request.query", req.query || UNKNOW);
+    req.jaeger.setTag('request.ip', req.ip || UNKNOW);
+    req.jaeger.setTag('request.method', req.method || UNKNOW);
+    req.jaeger.setTag('request.headers', req.headers || UNKNOW);
+    req.jaeger.setTag('request.path', req.path || UNKNOW);
+    req.jaeger.setTag('request.body', req.body || UNKNOW);
+    req.jaeger.setTag('request.query', req.query || UNKNOW);
     //////////////////////////////////////////////////
 
     // handle request callback
@@ -188,11 +188,11 @@ export class JaegerInterceptor implements NestInterceptor {
           this.res_cb(req, res);
         }
         //mark default tag of response
-        req.jaeger.setTag("response.state", res.statusCode || UNKNOW);
-        req.jaeger.setTag("response.result", res.statusMessage || UNKNOW);
+        req.jaeger.setTag('response.state', res.statusCode || UNKNOW);
+        req.jaeger.setTag('response.result', res.statusMessage || UNKNOW);
         req.jaeger.finish();
         ///////////////////////////////////////////////////
-      })
+      }),
     );
   }
 }

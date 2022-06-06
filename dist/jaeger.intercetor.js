@@ -16,21 +16,21 @@ const operators_1 = require("rxjs/operators");
 const jaeger_client_1 = require("jaeger-client");
 const opentracing_1 = require("opentracing");
 const axios_1 = require("axios");
-const TAGS = Object.assign(Object.assign({}, opentracing_1.Tags), { PROTOCAL: "protocal", TRACING_TAG: "tracing-tag" });
-const UNKNOW = "Unknow";
+const TAGS = Object.assign(Object.assign({}, opentracing_1.Tags), { PROTOCAL: 'protocal', TRACING_TAG: 'tracing-tag' });
+const UNKNOW = 'Unknow';
 const DEFAULT_SAMPLER = {
-    type: "const",
+    type: 'const',
     param: 1,
 };
 const DEFAULT_REPORTER = {
-    collectorEndpoint: "http://localhost:14268/api/traces",
+    collectorEndpoint: 'http://localhost:14268/api/traces',
 };
 const DEFAULT_LOGGER = {
     info: (msg) => {
-        console.log("JAEGER INFO ", msg);
+        console.log('JAEGER INFO ', msg);
     },
     error: (msg) => {
-        console.log("JAEGER ERROR", msg);
+        console.log('JAEGER ERROR', msg);
     },
 };
 const DEFAULT_OPTION = { logger: DEFAULT_LOGGER };
@@ -50,13 +50,13 @@ let JaegerInterceptor = class JaegerInterceptor {
             try {
                 const config = Object.assign(Object.assign({}, DEFAULT_CONFIG), cfg);
                 const options = Object.assign(Object.assign({}, DEFAULT_OPTION), opt);
-                this.tracer = jaeger_client_1.initTracer(config, options);
+                this.tracer = (0, jaeger_client_1.initTracer)(config, options);
                 this.req_cb = req_cb;
                 this.res_cb = res_cb;
-                console.log("[*]Init tracer ... [ DONE ] ");
+                console.log('[*]Init tracer ... [ DONE ] ');
             }
             catch (error) {
-                console.error("[*]Init tracer ... [ FAILED ] ");
+                console.error('[*]Init tracer ... [ FAILED ] ');
             }
         }
         else {
@@ -65,7 +65,7 @@ let JaegerInterceptor = class JaegerInterceptor {
     }
     intercept(context, next) {
         const reflector = new core_1.Reflector();
-        const except = reflector.get("ExceptJaegerInterceptor", context.getHandler());
+        const except = reflector.get('ExceptJaegerInterceptor', context.getHandler());
         if (except)
             return next.handle();
         if (!this.tracer)
@@ -92,13 +92,13 @@ let JaegerInterceptor = class JaegerInterceptor {
                 axios: (opts = undefined) => {
                     if (!opts)
                         return;
-                    var options = {};
-                    var headers = {};
+                    let options = {};
+                    const headers = {};
                     headers[TAGS.TRACING_TAG] = JSON.stringify(this.tracing_tag);
                     this.tracer.inject(this.span, opentracing_1.FORMAT_HTTP_HEADERS, headers);
                     opts.headers = Object.assign(Object.assign({}, opts.headers), headers);
                     options = Object.assign({}, opts);
-                    return axios_1.default(options);
+                    return (0, axios_1.default)(options);
                 },
                 log: (name, content) => {
                     if (!this.span)
@@ -137,27 +137,27 @@ let JaegerInterceptor = class JaegerInterceptor {
             };
         };
         req.jaeger = createJaegerInstance();
-        req.jaeger.setTag("request.ip", req.ip || UNKNOW);
-        req.jaeger.setTag("request.method", req.method || UNKNOW);
-        req.jaeger.setTag("request.headers", req.headers || UNKNOW);
-        req.jaeger.setTag("request.path", req.path || UNKNOW);
-        req.jaeger.setTag("request.body", req.body || UNKNOW);
-        req.jaeger.setTag("request.query", req.query || UNKNOW);
+        req.jaeger.setTag('request.ip', req.ip || UNKNOW);
+        req.jaeger.setTag('request.method', req.method || UNKNOW);
+        req.jaeger.setTag('request.headers', req.headers || UNKNOW);
+        req.jaeger.setTag('request.path', req.path || UNKNOW);
+        req.jaeger.setTag('request.body', req.body || UNKNOW);
+        req.jaeger.setTag('request.query', req.query || UNKNOW);
         if (this.req_cb) {
             this.req_cb(req, res);
         }
-        return next.handle().pipe(operators_1.tap(() => {
+        return next.handle().pipe((0, operators_1.tap)(() => {
             if (this.res_cb) {
                 this.res_cb(req, res);
             }
-            req.jaeger.setTag("response.state", res.statusCode || UNKNOW);
-            req.jaeger.setTag("response.result", res.statusMessage || UNKNOW);
+            req.jaeger.setTag('response.state', res.statusCode || UNKNOW);
+            req.jaeger.setTag('response.result', res.statusMessage || UNKNOW);
             req.jaeger.finish();
         }));
     }
 };
 JaegerInterceptor = __decorate([
-    common_1.Injectable(),
+    (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [Object, Object, Object, Object])
 ], JaegerInterceptor);
 exports.JaegerInterceptor = JaegerInterceptor;
