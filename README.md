@@ -23,7 +23,7 @@ To fully understand Jaeger, it's helpful to be familiar with the [Jaeger project
 ## Installation
 
 ```bash
-npm i @chankamlam/nest-jaeger -S
+npm i @servant573/nest-jaeger -S
 ```
 
 ## Architecture of Jaeger Server
@@ -47,7 +47,7 @@ docker run -d -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 -p5775:5775/udp -p6831:6831/udp
 ```ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {JaegerInterceptor} from '@chankamlam/nest-jaeger'
+import {JaegerInterceptor} from '@servant573/nest-jaeger'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = {
@@ -104,7 +104,7 @@ export class AppController {
 ```ts
 import { Controller, Get, UseInterceptors, SetMetadata,Req } from '@nestjs/common';
 import { AppService } from './app.service';
-import {JaegerInterceptor} from '@chankamlam/nest-jaeger';
+import {JaegerInterceptor} from '@servant573/nest-jaeger';
 
 @Controller()
 export class AppController {

@@ -16,12 +16,16 @@
     "prepublishOnly": "npm run build",
     "p": "npm publish --access public"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "author": {
-    "name": "Servant573"
+    "name": "chankamlam",
+    "email": "919125189@qq.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Servant573/nest-jaeger"
+    "url": "https://github.com/Servant573/nest-jaeger.git"
   },
   "license": "MIT",
   "dependencies": {
